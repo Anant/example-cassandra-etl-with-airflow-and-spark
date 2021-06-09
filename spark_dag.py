@@ -37,5 +37,5 @@ with DAG(
             /workspace/example-cassandra-etl-with-airflow-and-spark/etl.py'
     )
 
-    write_job >> etl_job
+    load_and_write >> etl_job
     # [END howto_operator_spark_submit]
