@@ -3,7 +3,7 @@
 # (optional)
 export AIRFLOW_HOME=~/airflow
 
-AIRFLOW_VERSION=2.0.2
+AIRFLOW_VERSION=2.4.1
 PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
 # For example: 3.6
 
