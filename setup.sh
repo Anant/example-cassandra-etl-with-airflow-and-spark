@@ -4,6 +4,8 @@
 export AIRFLOW_HOME=~/airflow
 
 AIRFLOW_VERSION=2.4.1
+AIRFLOW_PROVIDERS_SPARK_VERSION=1.0.3
+
 PYTHON_VERSION="$(python3 --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
 # For example: 3.6
 
@@ -12,7 +14,7 @@ CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${A
 
 pip3 install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 
-pip install apache-airflow-providers-apache-spark
+pip install "apache-airflow-providers-apache-spark==${AIRFLOW_PROVIDERS_SPARK_VERSION}"
 
 # initialize the database
 airflow db init
