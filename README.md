@@ -7,34 +7,98 @@ For this walkthrough, we will use 2 Spark jobs. The first Spark job will load 10
 If you have not already opened this in gitpod, then `CTR + Click` the button below and get started! <br></br>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Anant/example-cassandra-etl-with-airflow-and-spark)
 
-## 1. Set-up DataStax Astra
+## 1.a Set-up DataStax Astra (using User Interface)
 
-### 1.1 - Sign up for a free DataStax Astra account if you do not have one already
+### 1a.1 - Sign up for a free DataStax Astra account if you do not have one already
 
-### 1.2 - Hit the `Create Database` button on the dashboard
+### 1a.2 - Hit the `Create Database` button on the dashboard
 
-### 1.3 - Hit the `Get Started` button on the dashboard
+### 1a.3 - Hit the `Get Started` button on the dashboard
 This will be a pay-as-you-go method, but they won't ask for a payment method until you exceed $25 worth of operations on your account. We won't be using nearly that amount, so it's essentially a free Cassandra database in the cloud.
 
-### 1.4 - Define your database
+### 1a.4 - Define your database
 - Database name: whatever you want
 - Keyspace name: whatever you want
 - Cloud: whichever GCP region applies to you. 
 - Hit `create database` and wait a couple minutes for it to spin up and become `active`.
 
-### 1.5 - Generate application token
+### 1a.5 - Generate application token
 - Once your database is active, connect to it. 
 - Once on `dashboard/<your-db-name>`, click the `Settings` menu tab. 
 - Select `Admin User` for role and hit generate token. 
 - **COPY DOWN YOUR CLIENT ID AND CLIENT SECRET** as they will be used by Spark
 
-### 1.6 - Download `Secure Bundle`
+### 1a.6 - Download `Secure Bundle`
 - Hit the `Connect` tab in the menu
 - Click on `Node.js` (doesn't matter which option under `Connect using a driver`)
 - Download `Secure Bundle`
 - Drag-and-Drop the `Secure Bundle` into the running Gitpod container.
 
-### 1.7 - Copy and paste the contents of `setup.cql` into the CQLSH terminal
+### 1a.7 - Copy and paste the contents of `setup.cql` into the CQLSH terminal
+
+## 1b Set-up DataStax Astra (using Astra CLI)
+
+### 1b.1 - Setup Astra CLI and Connect it to your Account
+
+Sign up for a free DataStax Astra account if you do not have one already
+
+Download and install Astra CLI 
+
+```bash
+curl -Ls "https://dtsx.io/get-astra-cli" | bash
+```
+
+Open a new terminal to enable the autocompletion and add Astra in the path.
+
+```bash
+astra setup
+```
+- Enter a token that you got from the Astra dashboard 
+
+You are good to go - Read more at [Awesome-Astra: Astra CLI](https://awesome-astra.github.io/docs/pages/astra/astra-cli/)
+
+```bash
+astra db list
+```
+
+### 1b.2 - Create a database / keyspace with Astra CLI 
+
+```bash
+astra db create <your db name> -k <your keyspace name> --if-not-exist --wait
+```
+
+### 1a.3 - Get Application Token 
+
+- Once your database is active, connect to it. 
+- Once on `dashboard/<your-db-name>`, click the `Settings` menu tab. 
+- Select `Admin User` for role and hit generate token. 
+- **COPY DOWN YOUR CLIENT ID AND CLIENT SECRET** as they will be used by Spark
+
+TODO: Verify if this process of creating env file can get us what we need
+
+```bash
+astra db create-dotenv -f .env
+```
+
+
+### 1a.4 - Download `Secure Bundle`
+
+```bash
+astra db download-scb <your db name>
+```
+This will download a file called `scb_${dbid}-${dbregion}.zip` which we will use later. 
+
+
+### 1b.5 - Run `setup.cql` into the CQLSH terminal
+
+Edit your setup.cql to reflect the keyspace you made.
+
+```bash
+astra db cqlsh <your db name> -f setup.cql
+```
+
+
+###
 
 ## 2. Set up Airflow
 
