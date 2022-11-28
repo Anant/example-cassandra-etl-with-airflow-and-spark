@@ -1,0 +1,8 @@
+tasks:
+  - name: all-commands
+  - name: spark-master
+ports:
+  - port: 8081
+    onOpen: open-preview
+  - port: 8080
+    onOpen: open-preview

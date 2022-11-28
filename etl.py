@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     spark.conf.set(f"spark.sql.catalog.{database}", "com.datastax.spark.connector.datasource.CassandraCatalog")
 
-    spark.sql("use demo.test")
+    spark.sql(f"use {database}.{keyspace}")
 
     calcDF = spark.sql("select job_title, employee_id, employee_name, abs(datediff(last_day, first_day)) as days_worked from previous_employees_by_job_title")
     

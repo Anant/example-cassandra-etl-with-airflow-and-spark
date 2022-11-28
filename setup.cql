@@ -1,4 +1,4 @@
-CREATE TABLE test.previous_employees_by_job_title (
+CREATE TABLE airflowdemo.previous_employees_by_job_title (
     job_title text,
     employee_id uuid,
     employee_name text,
@@ -7,7 +7,7 @@ CREATE TABLE test.previous_employees_by_job_title (
     PRIMARY KEY (job_title, employee_id)
 ) WITH CLUSTERING ORDER BY (employee_id ASC);
 
-CREATE TABLE test.days_worked_by_previous_employees_by_job_title (
+CREATE TABLE airflowdemo.days_worked_by_previous_employees_by_job_title (
     job_title text,
     employee_id uuid,
     employee_name text,
