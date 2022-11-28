@@ -7,7 +7,7 @@ For this walkthrough, we will use 2 Spark jobs. The first Spark job will load 10
 If you have not already opened this in gitpod, then `CTR + Click` the button below and get started! <br></br>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Anant/example-cassandra-etl-with-airflow-and-spark)
 
-**Note**: Gitpod will start with _two_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
+**Note**: Gitpod will start with _three_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
 
 ## 1. Set up DataStax Astra
 
@@ -63,7 +63,7 @@ curl -Ls "https://dtsx.io/get-astra-cli" | bash
 Run the setup, providing the "Token" (the `AstraCS:...` string) when prompted:
 
 ```bash
-source ~/.bashrc      # required on terminals created before installation
+source ~/.bashrc      # required on any terminal created before installation
 astra setup
 ```
 
@@ -143,7 +143,11 @@ TODO: use this downstream to automate `properties.conf`
 We will be using the quick start script that Airflow provides [here](https://airflow.apache.org/docs/apache-airflow/stable/start/local.html).
 You will be asked to provide a password for the "admin" user, which will be needed later to access Airflow's Web interface. _Do not forget what you are entering!_
 
+**Note**: Run this command on the _second_ Gitpod terminal (labeled "run-airflow"), as this will not return control to your prompt.
+_You can switch the active terminal, if needed, through the switcher on the lower-right panel of Gitpod._
+
 ```bash
+# Run on the "run-airflow" console!
 bash setup.sh
 ```
 
@@ -151,15 +155,17 @@ bash setup.sh
 
 ### 3.1 - Start master
 
-**Note**: Run this command on the _second_ Gitpod terminal (labeled "spark-master"), as this will not return control to your prompt.
+**Note**: Run this command on the _third_ Gitpod terminal (labeled "spark-master"), as this will not return control to your prompt.
+_You can switch the active terminal, if needed, through the switcher on the lower-right panel of Gitpod._
 
 ```bash
+# Run on the spark-master" console!
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
 ```
 
 ### 3.2 - Start worker
 
-Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
+_(Get back to the "all-commands" console.)_ Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
 copy the master URL, and paste in the designated spot below
 
 ```bash

@@ -1,8 +1,13 @@
 tasks:
   - name: all-commands
+  - name: run-airflow
+    openMode: split-right
   - name: spark-master
+    openMode: split-right
 ports:
   - port: 8081
-    onOpen: open-preview
+    onOpen: open-browser
   - port: 8080
-    onOpen: open-preview
+    onOpen: open-browser
+  - port: 8793
+    onOpen: ignore
