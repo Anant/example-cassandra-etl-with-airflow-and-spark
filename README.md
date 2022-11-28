@@ -7,7 +7,7 @@ For this walkthrough, we will use 2 Spark jobs. The first Spark job will load 10
 If you have not already opened this in gitpod, then `CTR + Click` the button below and get started! <br></br>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Anant/example-cassandra-etl-with-airflow-and-spark)
 
-**Note**: Gitpod will start with _three_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
+**Note**: Gitpod will start with _two_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
 
 ## 1. Set up DataStax Astra
 
@@ -141,7 +141,7 @@ TODO: use this downstream to automate `properties.conf`
 ## 2. Set up Airflow
 
 We will be using the quick start script that Airflow provides [here](https://airflow.apache.org/docs/apache-airflow/stable/start/local.html).
-You will be asked to provide a password for the "admin" user, which will be needed later to access Airflow's Web interface. _Do not forget what you are entering!_
+You will be asked to configure a password for the "admin" user, which will be needed later to access Airflow's Web interface. _Do not forget what you are entering!_
 
 **Note**: Run this command on the _second_ Gitpod terminal (labeled "run-airflow"), as this will not return control to your prompt.
 _You can switch the active terminal, if needed, through the switcher on the lower-right panel of Gitpod._
@@ -153,10 +153,9 @@ bash setup.sh
 
 ## 3. Start Spark in standalone mode
 
-### 3.1 - Start master
+### 3.1 - Start Master
 
-**Note**: Run this command on the _third_ Gitpod terminal (labeled "spark-master"), as this will not return control to your prompt.
-_You can switch the active terminal, if needed, through the switcher on the lower-right panel of Gitpod._
+_(Get back to the "all-commands" console.)_ Start the Spark Master with:
 
 ```bash
 # Run on the spark-master" console!
@@ -165,12 +164,14 @@ _You can switch the active terminal, if needed, through the switcher on the lowe
 
 ### 3.2 - Start worker
 
-_(Get back to the "all-commands" console.)_ Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
+Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
 copy the master URL, and paste in the designated spot below
 
 ```bash
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-slave.sh <master-URL>
 ```
+
+Refresh the Spark Master UI (the page on port 8081 you just opened). Check that a "Worker" has now appeared in the list.
 
 ## 4. Move spark_dag.py to ~/airflow/dags
 
@@ -201,13 +202,13 @@ If it does not exist yet, give it a few seconds to refresh.
 
 ## 7. Update Spark Connection, unpause the `example_cassandra_etl`, and drill down by clicking on `example_cassandra_etl`.
 
-### 7.1 - Under the `Admin` section of the menu, select `Connection`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier. Save once done.
+### 7.1 - Under the `Admin` section of the menu, select `Connections`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier. Save once done.
 
 ### 7.2 - Select the `DAG` menu item and return to the dashboard. Unpause the `example_cassandra_etl`, and then click on the `example_cassandra_etl`link. 
 
 ## 8. Trigger the DAG from the tree view and click on the graph view afterwards
 
-## 9. Confirm data in Astra
+## 9. Confirm data in Astra DB
 
 ### 9.1 - Check `previous_employees_by_job_title`
 
@@ -216,7 +217,7 @@ Run a SELECT statement on the database table to check it has been populated.
 You can run it directly in your console with:
 
 ```bash
-astra db cqlsh workshops "select * from airflowdemo.previous_employees_by_job_title where job_title='Dentist' limit 20;"
+astra db cqlsh workshops -e "select * from airflowdemo.previous_employees_by_job_title where job_title='Dentist' limit 20;"
 ```
 
 <details>
@@ -236,7 +237,7 @@ On your Astra DB Dashboard:
 Similarly as above,
 
 ```bash
-astra db cqlsh workshops "select * from airflowdemo.days_worked_by_previous_employees_by_job_title where job_title='Dentist' limit 20;"
+astra db cqlsh workshops -e "select * from airflowdemo.days_worked_by_previous_employees_by_job_title where job_title='Dentist' limit 20;"
 ```
 
 <details>
