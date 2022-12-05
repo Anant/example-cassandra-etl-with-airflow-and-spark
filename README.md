@@ -7,122 +7,171 @@ For this walkthrough, we will use 2 Spark jobs. The first Spark job will load 10
 If you have not already opened this in gitpod, then `CTR + Click` the button below and get started! <br></br>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Anant/example-cassandra-etl-with-airflow-and-spark)
 
-## 1.a Set-up DataStax Astra (using User Interface)
+**Note**: Gitpod will start with _two_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
 
-### 1a.1 - Sign up for a free DataStax Astra account if you do not have one already
+## 1. Set up DataStax Astra
 
-### 1a.2 - Hit the `Create Database` button on the dashboard
+_**`ASTRA DB`** is the simplest way to run Cassandra with zero operations at all - just push the button and get your cluster. No credit card required, 40M read/write operations and about 80GB storage monthly for free - sufficient to run small production workloads. If you use up your credits the databases will pause, no charge, and you will be given the option to upgrade to a higher tier._
 
-### 1a.3 - Hit the `Get Started` button on the dashboard
-This will be a pay-as-you-go method, but they won't ask for a payment method until you exceed $25 worth of operations on your account. We won't be using nearly that amount, so it's essentially a free Cassandra database in the cloud.
+## 1a. Create your Astra account & Database
 
-### 1a.4 - Define your database
-- Database name: whatever you want
-- Keyspace name: whatever you want
-- Cloud: whichever GCP region applies to you. 
-- Hit `create database` and wait a couple minutes for it to spin up and become `active`.
+Leveraging [Database creation guide](https://awesome-astra.github.io/docs/pages/astra/create-instance/#c-procedure) create a database. *Right-Click the following button* with *Open in a new TAB.*
 
-### 1a.5 - Generate application token
-- Once your database is active, connect to it. 
-- Once on `dashboard/<your-db-name>`, click the `Settings` menu tab. 
-- Select `Admin User` for role and hit generate token. 
-- **COPY DOWN YOUR CLIENT ID AND CLIENT SECRET** as they will be used by Spark
+<a href="https://astra.dev/yt-12-07"><img src="images/create_astra_db.png?raw=true" /></a>
 
-### 1a.6 - Download `Secure Bundle`
-- Hit the `Connect` tab in the menu
-- Click on `Node.js` (doesn't matter which option under `Connect using a driver`)
-- Download `Secure Bundle`
-- Drag-and-Drop the `Secure Bundle` into the running Gitpod container.
+|Field|Value|
+|---|---|
+|**Database Name**| `workshops`|
+|**Keyspace Name**| `airflowdemo`|
+|**Regions**| Select `GOOGLE CLOUD`, then an Area close to you, then a region with no LOCK 🔒 icons: the LOCKed regions are the region not accessible to the Free Tier.
 
-### 1a.7 - Copy and paste the contents of `setup.cql` into the CQLSH terminal
+> **ℹ️ Note:** If you already have a database `workshops`, simply add a keyspace `airflowdemo` using the `Add Keyspace` button on the bottom right hand corner of the DB Dashboard page. You may have to "Resume" the database first in case it is in "hibernated" state.
 
-## 1b Set-up DataStax Astra (using Astra CLI)
+While the database is being created, you will also get a **Security token** (needed to authenticate with your database and start using it):
+**please IGNORE THIS ONE, as we will be soon creating a new, more powerful token for today**.
 
-### 1b.1 - Setup Astra CLI and Connect it to your Account
+The status will change from `Pending` to `Active` when the database is ready, this usually only takes 2-3 minutes.
 
-Sign up for a free DataStax Astra account if you do not have one already
+## 1b. Create a security token
 
-Download and install Astra CLI 
+> Note: this step is very important, as the token generated automatically for you with
+> the database lacks some permissions we'll use in the workshop.
+
+[Create a token for your app](https://awesome-astra.github.io/docs/pages/astra/create-token/#c-procedure),
+_using the **"Database Administrator"** role_.
+Keep it handy for later use (best to download it in CSV format, as the values
+will not be visible afterward).
+This will provide authentication later when interacting with the database.
+Keep in mind that _all three strings will be needed today_ (Client ID, Client Secret, Token).
+
+> **⚠️ Important**
+> ```
+> The instructor will show the token creation on screen,
+> but will then destroy it immediately for security reasons.
+> ```
+
+## 1c. Install Astra CLI
+
+[Astra CLI](https://awesome-astra.github.io/docs/pages/astra/astra-cli/)
+is a command-line utility to interact with Astra in several ways. As you'll
+be using it a few times in the following, first run the installation in :
 
 ```bash
 curl -Ls "https://dtsx.io/get-astra-cli" | bash
 ```
 
-Open a new terminal to enable the autocompletion and add Astra in the path.
+Run the setup, providing the "Token" (the `AstraCS:...` string) when prompted:
 
 ```bash
+source ~/.bashrc      # required on any terminal created before installation
 astra setup
 ```
-- Enter a token that you got from the Astra dashboard 
 
-You are good to go - Read more at [Awesome-Astra: Astra CLI](https://awesome-astra.github.io/docs/pages/astra/astra-cli/)
+As a test, you can run
 
 ```bash
 astra db list
 ```
 
-### 1b.2 - Create a database / keyspace with Astra CLI 
+or even the DB creation command (which will be a no-op if you created the DB already)
 
 ```bash
-astra db create <your db name> -k <your keyspace name> --if-not-exist --wait
+astra db create workshops -k airflowdemo --if-not-exist --wait
 ```
 
-### 1a.3 - Get Application Token 
+You are good to go - to find out more about Astra CLI, have a look at
+[Awesome-Astra](https://awesome-astra.github.io/docs/pages/astra/astra-cli/).
 
-- Once your database is active, connect to it. 
-- Once on `dashboard/<your-db-name>`, click the `Settings` menu tab. 
-- Select `Admin User` for role and hit generate token. 
-- **COPY DOWN YOUR CLIENT ID AND CLIENT SECRET** as they will be used by Spark
+## 1d. Download the Secure Connect Bundle
 
-TODO: Verify if this process of creating env file can get us what we need
+Use the CLI to download the Secure Connect Bundle to access the DB:
 
 ```bash
-astra db create-dotenv -f .env
+astra db download-scb workshops -f secure-connect-workshops.zip
 ```
 
+<details>
+<summary><strong>Show me how to do this without Astra CLI</strong></summary>
 
-### 1a.4 - Download `Secure Bundle`
+On your Astra DB Dashboard:
+
+- locate your `workshops` database and click on it;
+- find and open the "Connect" tab;
+- find the "Drivers" options and make sure _not_ to choose "Cloud Native";
+- select any language (irrelevant) and click the "Download Bundle" button below it;
+- drag-and-drop the zip file from your computer to Gitpod, renaming it to `secure-connect-workshops.zip` if needed and checking it is in the repo's root folder.
+
+</details>
+
+## 1e. Run a short CQL setup script
+
+Use the CLI to launch a small script to create a couple of tables in your database:
 
 ```bash
-astra db download-scb <your db name>
+astra db cqlsh workshops -f setup.cql
 ```
-This will download a file called `scb_${dbid}-${dbregion}.zip` which we will use later. 
 
+<details>
+<summary><strong>Show me how to do this without Astra CLI</strong></summary>
 
-### 1b.5 - Run `setup.cql` into the CQLSH terminal
+On your Astra DB Dashboard:
 
-Edit your setup.cql to reflect the keyspace you made.
+- locate your `workshops` database and click on it;
+- find and open the "CQL Console" tab;
+- wait a couple of seconds and a CQL console should open in the browser;
+- open `setup.cql` in the Gitpod editor and paste its contents to the CQL Web console.
+
+</details>
+
+<!-- ## 1f. Create dot-env file
+
+Use the Astra CLI to generate a `.env` file with all relevant information
+to connect to the database:
 
 ```bash
-astra db cqlsh <your db name> -f setup.cql
+astra db create-dotenv workshops -k airflowdemo
 ```
 
+TODO: check bugfix on astra-cli to have this working
 
-###
+TODO: use this downstream to automate `properties.conf`
+ -->
+
 
 ## 2. Set up Airflow
 
 We will be using the quick start script that Airflow provides [here](https://airflow.apache.org/docs/apache-airflow/stable/start/local.html).
+You will be asked to configure a password for the "admin" user, which will be needed later to access Airflow's Web interface. _Do not forget what you are entering!_
+
+**Note**: Run this command on the _second_ Gitpod terminal (labeled "run-airflow"), as this will not return control to your prompt.
+_You can switch the active terminal, if needed, through the switcher on the lower-right panel of Gitpod._
 
 ```bash
+# Run on the "run-airflow" console!
 bash setup.sh
 ```
 
 ## 3. Start Spark in standalone mode
 
-### 3.1 - Start master
+### 3.1 - Start Master
+
+_(Get back to the "all-commands" console.)_ Start the Spark Master with:
 
 ```bash
+# Run on the spark-master" console!
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
 ```
 
 ### 3.2 - Start worker
 
-Open port 8081 in the browser, copy the master URL, and paste in the designated spot below
+Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
+copy the master URL, and paste in the designated spot below
 
 ```bash
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-slave.sh <master-URL>
 ```
+
+Refresh the Spark Master UI (the page on port 8081 you just opened). Check that a "Worker" has now appeared in the list.
 
 ## 4. Move spark_dag.py to ~/airflow/dags
 
@@ -141,31 +190,68 @@ mv spark_dag.py ~/airflow/dags
 ## 5. Update the TODO's in properties.config with your specific parameters
 
 ```bash
-vim properties.conf
+gp open properties.conf
 ```
 
-## 6, Open port 8080 to see Airflow UI and check if `example_cassandra_etl` exists. 
+## 6, Open port 8080 to see Airflow UI and check if `example_cassandra_etl` exists.
+
+To open the address, you can run ```gp preview --external `gp url 8080` ``` (and then check your **popup blocker**).
+The credentials are `admin` and the password you chose when you ran the `setup.sh` script.
+
 If it does not exist yet, give it a few seconds to refresh.
 
 ## 7. Update Spark Connection, unpause the `example_cassandra_etl`, and drill down by clicking on `example_cassandra_etl`.
 
-### 7.1 - Under the `Admin` section of the menu, select `spark_default` and update the host to the Spark master URL. Save once done.
+### 7.1 - Under the `Admin` section of the menu, select `Connections`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier. Save once done.
 
 ### 7.2 - Select the `DAG` menu item and return to the dashboard. Unpause the `example_cassandra_etl`, and then click on the `example_cassandra_etl`link. 
 
 ## 8. Trigger the DAG from the tree view and click on the graph view afterwards
 
-## 9. Confirm data in Astra
+## 9. Confirm data in Astra DB
 
 ### 9.1 - Check `previous_employees_by_job_title`
 
+Run a SELECT statement on the database table to check it has been populated.
+
+You can run it directly in your console with:
+
 ```bash
-select * from <your-keyspace>.previous_employees_by_job_title where job_title='Dentist';
+astra db cqlsh workshops -e "select * from airflowdemo.previous_employees_by_job_title where job_title='Dentist' limit 20;"
 ```
 
+<details>
+<summary><strong>Show me how to do this without Astra CLI</strong></summary>
+
+On your Astra DB Dashboard:
+
+- locate your `workshops` database and click on it;
+- find and open the "CQL Console" tab;
+- wait a couple of seconds and a CQL console should open in the browser;
+- Paste the following and click Enter: `select * from airflowdemo.previous_employees_by_job_title where job_title='Dentist' limit 20;`
+
+</details>
+
 ### 9.2 - Check `days_worked_by_previous_employees_by_job_title`
+
+Similarly as above,
+
 ```bash
-select * from <your-keyspace>.days_worked_by_previous_employees_by_job_title where job_title='Dentist';
+astra db cqlsh workshops -e "select * from airflowdemo.days_worked_by_previous_employees_by_job_title where job_title='Dentist' limit 20;"
 ```
+
+<details>
+<summary><strong>Show me how to do this without Astra CLI</strong></summary>
+
+On your Astra DB Dashboard:
+
+- locate your `workshops` database and click on it;
+- find and open the "CQL Console" tab;
+- wait a couple of seconds and a CQL console should open in the browser;
+- Paste the following and click Enter: `select * from airflowdemo.days_worked_by_previous_employees_by_job_title where job_title='Dentist' limit 20;`
+
+</details>
+
+## Conclusion
 
 And that will wrap up our walkthrough. Again, this is a introduction on how to set up a basic Cassandra ETL process run by Airflow and Spark. As mentioned above, these baby steps can be used to further expand and create more complex and scheduled / repeated Cassandra ETL processes run by Airflow and Spark.

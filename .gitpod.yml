@@ -1,0 +1,17 @@
+tasks:
+  - name: all-commands
+  - name: run-airflow
+    openMode: split-right
+ports:
+  - port: 8081
+    onOpen: open-browser
+  - port: 8080
+    onOpen: open-browser
+  - port: 4040
+    onOpen: ignore
+  - port: 7077
+    onOpen: ignore
+  - port: 8082
+    onOpen: ignore
+  - port: 8793
+    onOpen: ignore
