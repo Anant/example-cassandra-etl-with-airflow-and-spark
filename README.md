@@ -247,10 +247,10 @@ If it does not exist yet, give it a few seconds to refresh.
 
 ## 8. Trigger the DAG from the tree view and click on the graph view afterwards as shown below.
 
-![](images/triggerdag.png)
-
 <details>
 <summary><strong>Show me</strong></summary>
+
+![](images/triggerdag.png)
 
 ![Triggering the DAG in Airflow](images/anant_8_trigger_dag.png)
 
