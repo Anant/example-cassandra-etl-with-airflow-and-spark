@@ -4,7 +4,9 @@ In this walkthrough, we will cover how we can use [Airflow](https://airflow.apac
 
 For this walkthrough, we will use 2 Spark jobs. The first Spark job will load 100k rows from a CSV and then write it into a Cassandra table. The second Spark job will read the data from the prior Cassandra table, do some transformations, and then write the transformed data into a different Cassandra table. We also used PySpark to reduce the number of steps to get this working. If we used Scala, we would be required to build the JAR's and that would require more time. If you are interested in seeing how to use the Airflow Spark Submit Operator and run Scala Spark jobs, check out this [walkthrough](https://github.com/Anant/example-airflow-and-spark)!
 
-If you have not already opened this in gitpod, then `CTR + Click` the button below and get started! <br></br>
+![](images/splash.png)
+
+If you have not already opened this in gitpod, then `CTRL + Click` the button below and get started! <br></br>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Anant/example-cassandra-etl-with-airflow-and-spark)
 
 **Note**: Gitpod will start with _two_ terminals side-by-side. Always use the first one (labeled "all-commands"), except when specified otherwise.
@@ -200,13 +202,19 @@ The credentials are `admin` and the password you chose when you ran the `setup.s
 
 If it does not exist yet, give it a few seconds to refresh.
 
-## 7. Update Spark Connection, unpause the `example_cassandra_etl`, and drill down by clicking on `example_cassandra_etl`.
+## 7. Update Spark Connection, unpause the `example_cassandra_etl`, and drill down by clicking on `example_cassandra_etl` as shown below.
 
-### 7.1 - Under the `Admin` section of the menu, select `Connections`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier. Save once done.
+![](images/unpause.png)
+
+### 7.1 - Under the `Admin` section of the menu, select `Connections`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier as shown below. Save once done.
+
+![](images/setmaster.png)
 
 ### 7.2 - Select the `DAG` menu item and return to the dashboard. Unpause the `example_cassandra_etl`, and then click on the `example_cassandra_etl`link. 
 
-## 8. Trigger the DAG from the tree view and click on the graph view afterwards
+## 8. Trigger the DAG from the tree view and click on the graph view afterwards as shown below.
+
+![](images/triggerdag.png)
 
 ## 9. Confirm data in Astra DB
 
@@ -252,6 +260,6 @@ On your Astra DB Dashboard:
 
 </details>
 
-## Conclusion
+## Conclusion(s)
 
 And that will wrap up our walkthrough. Again, this is a introduction on how to set up a basic Cassandra ETL process run by Airflow and Spark. As mentioned above, these baby steps can be used to further expand and create more complex and scheduled / repeated Cassandra ETL processes run by Airflow and Spark.
