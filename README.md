@@ -158,7 +158,7 @@ bash setup.sh
 _(Get back to the "all-commands" console.)_ Start the Spark Master with:
 
 ```bash
-# Run on the spark-master" console!
+# Run on the "all-commands" console!
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-master.sh
 ```
 
@@ -167,11 +167,26 @@ _(Get back to the "all-commands" console.)_ Start the Spark Master with:
 Open port 8081 in the browser (you can do so by running ```gp preview --external `gp url 8081` ``` and checking your **popup blocker**),
 copy the master URL, and paste in the designated spot below
 
+<details>
+<summary><strong>Show me</strong></summary>
+
+![Locating the Spark Master URL](images/anant_3_2_spark-master-url.png)
+
+</details>
+
+
 ```bash
 ./spark-3.0.1-bin-hadoop2.7/sbin/start-slave.sh <master-URL>
 ```
 
 Refresh the Spark Master UI (the page on port 8081 you just opened). Check that a "Worker" has now appeared in the list.
+
+<details>
+<summary><strong>Show me</strong></summary>
+
+![A worker has appeared](images/anant_3_2_master-with-worker.png)
+
+</details>
 
 ## 4. Move spark_dag.py to ~/airflow/dags
 
@@ -193,6 +208,9 @@ mv spark_dag.py ~/airflow/dags
 gp open properties.conf
 ```
 
+Paste your master URL and, in the username/password fields, the "Client ID"
+and "Client Secret" found in your Database Administrator token.
+
 ## 6, Open port 8080 to see Airflow UI and check if `example_cassandra_etl` exists.
 
 To open the address, you can run ```gp preview --external `gp url 8080` ``` (and then check your **popup blocker**).
@@ -204,9 +222,32 @@ If it does not exist yet, give it a few seconds to refresh.
 
 ### 7.1 - Under the `Admin` section of the menu, select `Connections`, then `spark_default` and update the host from the default (`yarn`) to the Spark master URL found earlier. Save once done.
 
+<details>
+<summary><strong>Show me</strong></summary>
+
+![Opening the connection settings in Airflow](images/anant_7_1_edit-record.png)
+
+![Saving the Spark Master URL in Airflow](images/anant_7_1_save-spark-master-host.png)
+
+</details>
+
 ### 7.2 - Select the `DAG` menu item and return to the dashboard. Unpause the `example_cassandra_etl`, and then click on the `example_cassandra_etl`link. 
 
+<details>
+<summary><strong>Show me</strong></summary>
+
+![Unpausing the ETL job in Airflow](images/anant_7_2_unpause.png)
+
+</details>
+
 ## 8. Trigger the DAG from the tree view and click on the graph view afterwards
+
+<details>
+<summary><strong>Show me</strong></summary>
+
+![Triggering the DAG in Airflow](images/anant_8_trigger_dag.png)
+
+</details>
 
 ## 9. Confirm data in Astra DB
 
